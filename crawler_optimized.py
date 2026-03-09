@@ -65,13 +65,13 @@ MIN_RUN_TIME = 3600             # 单次最短运行时间（秒），默认1小
 SUGGEST_REST_TIME = 3600        # 建议休息时间（秒），默认1小时
 
 # 代理配置(配置自己的参数)
-KDL_API_URL = 'XXX'
-KDL_USERNAME = 'XXX'
-KDL_PASSWORD = 'XXX'
+DL_API_URL = 'XXX'
+DL_USERNAME = 'XXX'
+DL_PASSWORD = 'XXX'
 
 # 代理配置
 USE_PROXY = True                # 启用代理
-PROXY_TYPE = 'kdl'              # 代理类型：'kdl'=XXX, 'manual'=手动配置
+PROXY_TYPE = 'dl'              # 代理类型：'dl'=XXX, 'manual'=手动配置
 PROXY_LIST = []                 # 手动配置的代理列表（PROXY_TYPE='manual'时使用）
 PROXY_ROTATION = True           # 是否轮换代理
 PROXY_REFRESH_INTERVAL = 3000   # 代理刷新间隔（秒），50分钟（避免超限：150分钟内最多3次=9个IP<20限制）
@@ -139,12 +139,12 @@ def load_proxy_cache():
     
     return False
 
-def fetch_kdl_proxies():
+def fetch_dl_proxies():
     """从代理API获取代理列表"""
     global proxy_fetch_failed_time
     
     try:
-        response = requests.get(KDL_API_URL, timeout=10)
+        response = requests.get(DL_API_URL, timeout=10)
         data = response.json()
         if data.get('code') == 0:
             proxy_list = data.get('data', {}).get('proxy_list', [])
@@ -177,7 +177,7 @@ def get_proxy():
         return None
     
     # 代理模式
-    if PROXY_TYPE == 'kdl':
+    if PROXY_TYPE == 'dl':
         current_time = time.time()
         
         # 首次运行时加载缓存
@@ -196,7 +196,7 @@ def get_proxy():
                     else:
                         proxy_ip = PROXY_LIST[0]
                     
-                    proxy_url = f"http://{KDL_USERNAME}:{KDL_PASSWORD}@{proxy_ip}/"
+                    proxy_url = f"http://{DL_USERNAME}:{DL_PASSWORD}@{proxy_ip}/"
                     return {'http': proxy_url, 'https': proxy_url}
                 else:
                     # 没有可用代理，不使用代理
@@ -208,7 +208,7 @@ def get_proxy():
         # 首次获取或需要刷新
         if not PROXY_LIST or (current_time - last_proxy_refresh) >= PROXY_REFRESH_INTERVAL:
             log(f"刷新代理IP池（上次刷新: {(current_time - last_proxy_refresh)/60:.1f}分钟前）", 'INFO')
-            new_proxies = fetch_kdl_proxies()
+            new_proxies = fetch_dl_proxies()
             
             if new_proxies:
                 PROXY_LIST = new_proxies
@@ -228,7 +228,7 @@ def get_proxy():
             else:
                 proxy_ip = PROXY_LIST[0]
             
-            proxy_url = f"http://{KDL_USERNAME}:{KDL_PASSWORD}@{proxy_ip}/"
+            proxy_url = f"http://{DL_USERNAME}:{DL_PASSWORD}@{proxy_ip}/"
             return {'http': proxy_url, 'https': proxy_url}
         else:
             return None
@@ -363,9 +363,9 @@ def get_page(url, retries=MAX_RETRIES, is_detail=False):
                             current_proxy_index = 0
                         
                         # 尝试获取新代理补充
-                        if PROXY_TYPE == 'kdl' and proxy_fetch_failed_time == 0:
+                        if PROXY_TYPE == 'dl' and proxy_fetch_failed_time == 0:
                             log(f"尝试获取新代理补充...", 'INFO')
-                            new_proxies = fetch_kdl_proxies()
+                            new_proxies = fetch_dl_proxies()
                             if new_proxies:
                                 # 只添加新获取的代理，不替换现有的
                                 for new_proxy in new_proxies:
@@ -758,7 +758,7 @@ def main():
         log(f"建议休息时间: {SUGGEST_REST_TIME/3600:.1f}小时")
     log(f"代理模式: {'启用' if USE_PROXY else '未启用'}")
     if USE_PROXY:
-        if PROXY_TYPE == 'kdl':
+        if PROXY_TYPE == 'dl':
             log(f"代理类型: XXX")
             log(f"代理轮换: {'启用' if PROXY_ROTATION else '未启用'}")
             log(f"刷新间隔: {PROXY_REFRESH_INTERVAL/60:.0f}分钟 (每次获取3个IP)")
