@@ -1,0 +1,50 @@
+{
+  "comment": "爬虫配置文件 - 可根据实际情况调整",
+  "delays": {
+    "request_min": 4.0,
+    "request_max": 8.0,
+    "page_min": 10,
+    "page_max": 20,
+    "batch_min": 60,
+    "batch_max": 90,
+    "error_min": 120,
+    "error_max": 180,
+    "connection_reset_min": 300,
+    "connection_reset_max": 600
+  },
+  "batch": {
+    "batch_size": 20,
+    "cases_per_session": 50,
+    "max_retries": 2,
+    "max_connection_resets": 3
+  },
+  "optimization_levels": {
+    "conservative": {
+      "comment": "保守模式 - 触发安全策略后使用",
+      "request": [6, 12],
+      "page": [20, 40],
+      "batch_size": 10,
+      "cases_per_session": 30
+    },
+    "moderate": {
+      "comment": "适中模式 - 当前默认",
+      "request": [4, 8],
+      "page": [10, 20],
+      "batch_size": 20,
+      "cases_per_session": 50
+    },
+    "aggressive": {
+      "comment": "激进模式 - 仅在确认安全时使用",
+      "request": [2, 4],
+      "page": [5, 10],
+      "batch_size": 50,
+      "cases_per_session": 100
+    }
+  },
+  "tips": [
+    "如果频繁触发10054错误，切换到conservative模式",
+    "每次运行前检查网络连接是否稳定",
+    "可以考虑使用代理IP分散请求",
+    "保持耐心，慢即是快"
+  ]
+}
